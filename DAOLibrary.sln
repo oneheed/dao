@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAOLibrary", "DAOLibrary\DAOLibrary.csproj", "{0ECDAA17-3A47-473E-A4DE-78946FD43311}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://10.10.102.125:8080/tfs/apcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = DAOLibrary\\DAOLibrary.csproj
+		SccProjectName1 = DAOLibrary
+		SccLocalPath1 = DAOLibrary
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0ECDAA17-3A47-473E-A4DE-78946FD43311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ECDAA17-3A47-473E-A4DE-78946FD43311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ECDAA17-3A47-473E-A4DE-78946FD43311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ECDAA17-3A47-473E-A4DE-78946FD43311}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
