@@ -7,7 +7,7 @@ namespace DAOLibrary
 {
     class Cryptography
     {
-        private static string DES_Key = "ONE@awTW";
+        private const string DES_Key = "ONE@awTW";
 
         #region DESEnCode DES加密
         public static string DESEncode(string pToEncrypt)
