@@ -18,6 +18,7 @@ namespace DAOLibrary
         {
             var op = new MongoDb();
             op.SetConnection("10.10.102.112", "sa", "1111", "emp");
+            //op.SetConnection("10.10.102.112", "emp");
 
             MongoCRUDObj obj = new MongoCRUDObj()
             {
@@ -33,7 +34,7 @@ namespace DAOLibrary
             {
                 //var r = op.Insert<MongoCRUDObj>(obj);
 
-                var r2 = op.Query<MongoCRUDObj>(obj);
+                var r2 = op.Query(obj);
 
                 foreach (var e in r2)
                     Console.WriteLine(e.ToJson());
