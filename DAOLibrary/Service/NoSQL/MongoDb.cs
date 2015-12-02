@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace DAOLibrary.Service.NoSQL
 {
-    class MongoDb
+    public class MongoDb
     {
         private MongoDatabase _db;
 
         #region Connection
-        internal void SetConnection(string server, string user, string password, string dbName)
+        public void SetConnection(string server, string user, string password, string dbName)
         {
             var connStr = _GetAuthConnectStr(server, user, password);
             _SetConnection(connStr, dbName);
         }
 
-        internal void SetConnection(string server, string dbName)
+        public void SetConnection(string server, string dbName)
         {
             var connStr = _GetConnectStr(server);
             _SetConnection(connStr, dbName);

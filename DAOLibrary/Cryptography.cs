@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DAOLibrary
 {
-    class Cryptography
+    public class Cryptography
     {
         private const string DES_Key = "ONE@awTW";
 

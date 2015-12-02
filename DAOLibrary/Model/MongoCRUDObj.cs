@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DAOLibrary.Model
 {
-    class MongoCRUDObj
+    public class MongoCRUDObj
     {
         public string Collection { get; set; }
         public object InsertData { get; set; }
