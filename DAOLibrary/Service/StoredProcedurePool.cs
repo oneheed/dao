@@ -11,8 +11,7 @@ namespace DAOLibrary.Service
     public class StoredProcedurePool
     {
         private static ConcurrentDictionary<string, DbObj> _DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
-        private static readonly int _UpdateSeconds = 3;
-
+     
         public static Dictionary<string, DbObj> DbProcedures
         {
             get { return new Dictionary<string, DbObj>(_DbProcedures); }
@@ -24,7 +23,7 @@ namespace DAOLibrary.Service
             {
                 var oriDbObj = _DbProcedures.GetOrAdd(connectionString, (o) => { return new DbObj(); });
 
-                if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > _UpdateSeconds)
+                if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > Const.PROCEDURE_UPDATE_SEC)
                 {
                     using (SqlConnection conn = new SqlConnection(connectionString))
                     {

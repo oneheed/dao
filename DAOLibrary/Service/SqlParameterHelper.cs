@@ -37,7 +37,7 @@ namespace DAOLibrary
 
         private static DataTable OutPutColumns(string decodeConnectionString, string SpName, string ColumnName)
         {
-            string strComment = "Exec usp_getUserDefinedTableColCount " + SpName + "," + ColumnName;
+            string strComment = string.Format(Const.TMP_GET_USER_DEFINED_TABLE_COL_COUNT, SpName, ColumnName);
             SqlDataAdapter saCount = new SqlDataAdapter(strComment, decodeConnectionString);
 
             DataTable dtCount = new DataTable();
@@ -59,14 +59,14 @@ namespace DAOLibrary
         {
             StoredProcedurePool.UpdateProcedure(decodeConnectionString);
             if (StoredProcedurePool.DbProcedures == null || StoredProcedurePool.DbProcedures.Count == 0)
-                throw new Exception("Dictionary尚未裝載資料！");
+                throw new Exception(Const.CANNOT_GET_SP_LIST);
 
             var dbObj = new DbObj();
 
             StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
 
             if (dbObj.ProcedureList == null || dbObj.ProcedureList.Count == 0 || string.IsNullOrEmpty(dbObj.ProcedureList[procedureKey].ProcedureName))
-                throw new Exception(string.Format("資料表Procedure，沒有與{0}對應的預存程序！", procedureKey));
+                throw new Exception(string.Format(Const.NO_SUCH_SP, procedureKey));
 
             return dbObj;
         }
@@ -136,7 +136,7 @@ namespace DAOLibrary
                 }
                 else
                 {
-                    throw new Exception("參數名稱 [parameterName] 與參數內容 [parameterValue] 數量不相等 !");
+                    throw new Exception(Const.PARAM_NOT_MATCH);
                 }
             }
             return sqlparameterlist;
@@ -209,7 +209,7 @@ namespace DAOLibrary
                 }
                 else
                 {
-                    throw new Exception("參數名稱 [parameterName] 與參數內容 [parameterValue] 數量不相等 !");
+                    throw new Exception(Const.PARAM_NOT_MATCH);
                 }
             }
             return sqlParamList;
