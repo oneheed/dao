@@ -26,13 +26,13 @@ namespace DAOLibrary
         public abstract DataSet GetDataSetFromSp(string procedureKey, int timeout, Dictionary<string, object> sqlParameterValue);
         public abstract DataSet GetDataSetFromSp(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue);
         public abstract DataSet GetDataSetFromSp(string procedureKey, int timeout, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue);
-        public abstract List<O> GetListFromSp<O>(string procedureKey, params object[] sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, int timeout, params object[] sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, int timeout, ref object[] outputParameterValue, params object[] sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, Dictionary<string, object> sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, int timeout, Dictionary<string, object> sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue) where O : new();
-        public abstract List<O> GetListFromSp<O>(string procedureKey, int timeout, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue) where O : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, params object[] sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, int timeout, params object[] sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, int timeout, ref object[] outputParameterValue, params object[] sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, Dictionary<string, object> sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, int timeout, Dictionary<string, object> sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue) where T : new();
+        public abstract List<T> GetListFromSp<T>(string procedureKey, int timeout, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue) where T : new();
     }
 }

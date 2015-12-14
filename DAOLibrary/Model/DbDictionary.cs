@@ -10,7 +10,7 @@ namespace DAOLibrary
 
     public static class DbDictionary
     {
-        public static Dictionary<string, SqlDbType> dic = new Dictionary<string, SqlDbType>();
+        private static Dictionary<string, SqlDbType> dic = new Dictionary<string, SqlDbType>();
         public static Dictionary<string, SqlDbType> mappingSqlDbType()
         {
             if (dic.Count > 0)
