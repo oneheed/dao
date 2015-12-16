@@ -120,7 +120,7 @@ namespace DAOLibrary
             var paramsFromDb = dbObj.ProcedureList[procedureKey].ParameterObjs;
             int parameterValueLength = paramsFromDb.Where(x => x.OutputFlag == false).Count();
 
-            if (parameterValueLength > 0)
+            //if (parameterValueLength > 0)
             {
                 var paramNameFromDB = paramsFromDb.Where(o => o.OutputFlag == true)
                                                   .Select((o) => { return o.Parameter.ToUpper().Replace("@", ""); }).ToList();
