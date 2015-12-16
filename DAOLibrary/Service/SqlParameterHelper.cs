@@ -17,6 +17,7 @@ namespace DAOLibrary
         #region private method
         private static SqlParameter TryGetSqlParamter(ParameterObj pObj, SqlDbType sqlDbType, object parameterValue)
         {
+            parameterValue = sqlDbType == SqlDbType.UniqueIdentifier ? Guid.Parse(parameterValue.ToString()) : parameterValue;
             if (pObj.Length > 0)
             {
                 return (new SqlParameter(pObj.Parameter, sqlDbType, pObj.Length)

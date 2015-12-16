@@ -110,7 +110,7 @@ namespace DAOLibrary
                 return ds;
             }
         }
-        private List<T> GetDataReader<T>(List<SqlParameter> sqlParameterList, string cmdStr, int timeout = 30) where T : new()
+        private List<T> GetDataStructList<T>(List<SqlParameter> sqlParameterList, string cmdStr, int timeout = 30) where T : new()
         {
             using (SqlConnection cn = new SqlConnection(decodeConnectionString))
             {
@@ -216,7 +216,7 @@ namespace DAOLibrary
             {
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString);
+                return GetDataStructList<T>(sqlParameterList, commandTextString);
             }
             catch
             {
@@ -229,7 +229,7 @@ namespace DAOLibrary
             {
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString, timeout);
+                return GetDataStructList<T>(sqlParameterList, commandTextString, timeout);
             }
             catch
             {
@@ -244,7 +244,7 @@ namespace DAOLibrary
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString);
+                return GetDataStructList<T>(sqlParameterList, commandTextString);
             }
             catch
             {
@@ -259,7 +259,7 @@ namespace DAOLibrary
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString, timeout);
+                return GetDataStructList<T>(sqlParameterList, commandTextString, timeout);
             }
             catch
             {
@@ -358,7 +358,7 @@ namespace DAOLibrary
             {
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString);
+                return GetDataStructList<T>(sqlParameterList, commandTextString);
             }
             catch
             {
@@ -371,7 +371,7 @@ namespace DAOLibrary
             {
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString, timeout);
+                return GetDataStructList<T>(sqlParameterList, commandTextString, timeout);
             }
             catch
             {
@@ -386,7 +386,7 @@ namespace DAOLibrary
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString);
+                return GetDataStructList<T>(sqlParameterList, commandTextString);
             }
             catch
             {
@@ -401,7 +401,7 @@ namespace DAOLibrary
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
-                return GetDataReader<T>(sqlParameterList, commandTextString, timeout);
+                return GetDataStructList<T>(sqlParameterList, commandTextString, timeout);
             }
             catch
             {
