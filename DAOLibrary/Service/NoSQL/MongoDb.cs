@@ -13,6 +13,24 @@ namespace DAOLibrary.Service.NoSQL
     {
         private MongoDatabase _db;
 
+        public MongoDb() { }
+
+        public MongoDb(string server, string user, string password, string dbName)
+        {
+            if (_db == null)
+            {
+                SetConnection(server, user, password, dbName);
+            }
+        }
+
+        public MongoDb(string server, string dbName)
+        {
+            if (_db == null)
+            {
+                SetConnection(server, dbName);
+            }
+        }
+
         #region Connection
         public void SetConnection(string server, string user, string password, string dbName)
         {

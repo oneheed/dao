@@ -9,6 +9,8 @@ namespace DAOLibrary.Model
     public class ProcedureObj
     {
         public string ProcedureName { get; set; }
+        public string DBName { get;set; }
+        public string DBServer { get; set; }
         public List<ParameterObj> ParameterObjs { get; set; }
     }
 }

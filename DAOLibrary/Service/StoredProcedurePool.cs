@@ -11,7 +11,16 @@ namespace DAOLibrary.Service
     public class StoredProcedurePool
     {
         private static ConcurrentDictionary<string, DbObj> _DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
-     
+        private static object lockObj = new object();
+        private static int _updateSec = 60;
+        internal protected static void SetProcedureUpdateSecond(int sec)
+        {
+            lock (lockObj)
+            {
+                _updateSec = sec;
+            }
+        }
+
         public static Dictionary<string, DbObj> DbProcedures
         {
             get { return new Dictionary<string, DbObj>(_DbProcedures); }
@@ -23,7 +32,7 @@ namespace DAOLibrary.Service
             {
                 var oriDbObj = _DbProcedures.GetOrAdd(connectionString, (o) => { return new DbObj(); });
 
-                if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > Const.PROCEDURE_UPDATE_SEC)
+                if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > _updateSec)
                 {
                     using (SqlConnection conn = new SqlConnection(connectionString))
                     {
@@ -58,7 +67,13 @@ namespace DAOLibrary.Service
                                         parameterObjs.Add(pObj);
                                     }
 
-                                    newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj() { ProcedureName = dr["Name"].ToString(), ParameterObjs = parameterObjs });
+                                    newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                    {
+                                        ProcedureName = dr["Name"].ToString(),
+                                        DBName = dr["DBName"].ToString(),
+                                        DBServer = dr["ServerIP"].ToString(),
+                                        ParameterObjs = parameterObjs
+                                    });
                                 }
                             }
                             newDbObj.UpdateTime = DateTime.Now;
