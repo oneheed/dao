@@ -1,6 +1,7 @@
 ﻿using DAOLibrary.Model;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,11 +53,19 @@ namespace DAOLibrary.Service.NoSQL
 
         private string _GetAuthConnectStr(string server, string user, string password)
         {
+            if (server.StartsWith("mongodb://", StringComparison.CurrentCultureIgnoreCase))
+            {
+                server = server.Remove(0, "mongodb://".Length);
+            }
             return string.Format(Const.TMP_MONGODB_AUTH_CONN_STR, user, password, server);
         }
 
         private string _GetConnectStr(string server)
         {
+            if (server.StartsWith("mongodb://", StringComparison.CurrentCultureIgnoreCase))
+            {
+                server = server.Remove(0, "mongodb://".Length);
+            }
             return string.Format(Const.TMP_MONGODB_CONN_STR, server);
         }
         #endregion
@@ -73,24 +82,45 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
-        public MongoCursor<BsonDocument> Update(MongoCRUDObj obj)
+        public bool Update(MongoCRUDObj obj)
         {
-            return Run<object, MongoCursor<BsonDocument>>((o) =>
+            return Run<object, bool>((o) =>
             {
                 var data = o as MongoCRUDObj;
                 var c = _db.GetCollection(data.Collection);
-                c.Update(data.QueryFilter, data.UpdateData);
-                return Query(obj);
+                var result = c.Update(data.QueryFilter, data.UpdateData, UpdateFlags.Multi);
+                return result.Ok;
             }, obj);
         }
 
-        public MongoCursor<BsonDocument> Query(MongoCRUDObj obj)
+        public IEnumerable<BsonDocument> QueryAndUpdate(MongoCRUDObj obj)
         {
-            return Run<object, MongoCursor<BsonDocument>>((d) =>
+            return Run<object, List<BsonDocument>>((o) =>
+            {
+                var data = o as MongoCRUDObj;
+                var c = _db.GetCollection(data.Collection);
+                var result = c.FindAndModify(new FindAndModifyArgs()
+                {
+                    Query = obj.QueryFilter,
+                    SortBy = obj.SortKeys,
+                    Update = obj.UpdateData,
+                    VersionReturned = FindAndModifyDocumentVersion.Modified
+                });
+                return new List<BsonDocument>() { result.ModifiedDocument };
+            }, obj);
+        }
+
+        public IEnumerable<BsonDocument> Query(MongoCRUDObj obj, int num = int.MaxValue)
+        {
+            return Run<object, List<BsonDocument>>((d) =>
             {
                 var data = obj as MongoCRUDObj;
                 var c = _db.GetCollection(data.Collection);
-                return c.FindAs<BsonDocument>(data.QueryFilter);
+                if (obj.SortKeys != null)
+                {
+                    return c.FindAs<BsonDocument>(data.QueryFilter).SetSortOrder(obj.SortKeys).SetLimit(num).ToList();
+                }
+                return c.FindAs<BsonDocument>(data.QueryFilter).SetLimit(num).ToList();
             }, obj);
         }
 

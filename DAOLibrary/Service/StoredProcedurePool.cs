@@ -87,5 +87,24 @@ namespace DAOLibrary.Service
                 throw;
             }
         }
+
+        //private static void RenewDbProcedure(string connectionString)
+        //{
+        //    lock (lockObj)
+        //    {
+        //        try
+        //        {
+        //            using (SqlConnection conn = new SqlConnection(connectionString))
+        //            {
+        //                using (SqlCommand cmd = new SqlCommand(Const.RENEW_PROCEDURE_PARAMETER, conn))
+        //                {
+        //                    conn.Open();
+        //                    cmd.ExecuteNonQuery();
+        //                }
+        //            }
+        //        }
+        //        catch { }
+        //    }
+        //}
     }
 }

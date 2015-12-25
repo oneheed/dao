@@ -13,5 +13,6 @@ namespace DAOLibrary.Model
         public object InsertData { get; set; }
         public IMongoQuery QueryFilter { get; set; }
         public IMongoUpdate UpdateData { get; set; }
+        public IMongoSortBy SortKeys { get; set; }
     }
 }

@@ -112,10 +112,14 @@ namespace DAOLibrary
             return parameterString;
         }
 
-        private static List<SqlParameter> TryGetSqlParamterList(string decodeConnectionString, string procedureKey, ref string commandTextString, Dictionary<string, object> sqlParameterValue)
+        private static string TryGetProcedureName(DbObj dbObj, string procedureKey)
         {
-            var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
-            commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
+            try { return dbObj.ProcedureList[procedureKey].ProcedureName; }
+            catch { throw new Exception("Cannot get procedure name for " + procedureKey); }
+        }
+
+        private static List<SqlParameter> TryGetSqlParamterList(DbObj dbObj, string decodeConnectionString, string procedureKey, Dictionary<string, object> sqlParameterValue)
+        {
             var sqlparameterlist = new List<SqlParameter>();
             var paramsFromDb = dbObj.ProcedureList[procedureKey].ParameterObjs;
             int parameterValueLength = paramsFromDb.Where(x => x.OutputFlag == false).Count();
@@ -147,7 +151,9 @@ namespace DAOLibrary
         {
             try
             {
-                var sqlparameterlist = TryGetSqlParamterList(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
+                commandTextString = TryGetProcedureName(dbObj, procedureKey);
+                var sqlparameterlist = TryGetSqlParamterList(dbObj, decodeConnectionString, procedureKey, sqlParameterValue);
 
                 return sqlparameterlist;
             }
@@ -161,7 +167,9 @@ namespace DAOLibrary
         {
             try
             {
-                var sqlparameterlist = TryGetSqlParamterList(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
+                commandTextString = TryGetProcedureName(dbObj, procedureKey);
+                var sqlparameterlist = TryGetSqlParamterList(dbObj, decodeConnectionString, procedureKey, sqlParameterValue);
                 foreach (var p in sqlparameterlist)
                 {
                     if (p.Direction == ParameterDirection.Output)
@@ -179,10 +187,8 @@ namespace DAOLibrary
         #endregion
 
         #region objectParameter
-        private static List<SqlParameter> TryGetSqlParameterListByObject(string decodeConnectionString, string procedureKey, ref string commandTextString, object[] sqlParameterValue)
+        private static List<SqlParameter> TryGetSqlParameterListByObject(DbObj dbObj, string commandTextString, string decodeConnectionString, string procedureKey, object[] sqlParameterValue)
         {
-            var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
-            commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
 
             if (sqlParameterValue == null)
                 sqlParameterValue = new object[] { };
@@ -220,7 +226,10 @@ namespace DAOLibrary
         {
             try
             {
-                var sqlParamList = TryGetSqlParameterListByObject(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
+                commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
+
+                var sqlParamList = TryGetSqlParameterListByObject(dbObj, commandTextString, decodeConnectionString, procedureKey, sqlParameterValue);
 
                 foreach (var p in sqlParamList)
                 {
@@ -241,7 +250,10 @@ namespace DAOLibrary
         {
             try
             {
-                var sqlparameterlist = TryGetSqlParameterListByObject(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var dbObj = TryGetDbObj(decodeConnectionString, procedureKey);
+                commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
+
+                var sqlparameterlist = TryGetSqlParameterListByObject(dbObj, commandTextString, decodeConnectionString, procedureKey, sqlParameterValue);
 
                 return sqlparameterlist;
             }
