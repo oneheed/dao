@@ -66,7 +66,7 @@ namespace DAOLibrary
 
             StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
 
-            if (dbObj.ProcedureList == null || dbObj.ProcedureList.Count == 0 || string.IsNullOrEmpty(dbObj.ProcedureList[procedureKey].ProcedureName))
+            if (dbObj.ProcedureList == null || dbObj.ProcedureList.Count == 0 || !dbObj.ProcedureList.ContainsKey(procedureKey))
                 throw new Exception(string.Format(Const.NO_SUCH_SP, procedureKey));
 
             return dbObj;

@@ -37,12 +37,20 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MongoDB.Bson, Version=1.10.0.277, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
-      <HintPath>packages\mongocsharpdriver.1.10.0-rc0\lib\net35\MongoDB.Bson.dll</HintPath>
+    <Reference Include="MongoDB.Bson, Version=2.2.0.262, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>C:\Users\NickChen\Documents\Visual Studio 2015\Projects\TestDAO\packages\MongoDB.Bson.2.2.0\lib\net45\MongoDB.Bson.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MongoDB.Driver, Version=1.10.0.277, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
-      <HintPath>packages\mongocsharpdriver.1.10.0-rc0\lib\net35\MongoDB.Driver.dll</HintPath>
+    <Reference Include="MongoDB.Driver, Version=2.2.0.262, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>C:\Users\NickChen\Documents\Visual Studio 2015\Projects\TestDAO\packages\MongoDB.Driver.2.2.0\lib\net45\MongoDB.Driver.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Core, Version=2.2.0.262, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>C:\Users\NickChen\Documents\Visual Studio 2015\Projects\TestDAO\packages\MongoDB.Driver.Core.2.2.0\lib\net45\MongoDB.Driver.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Legacy, Version=2.2.0.262, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>C:\Users\NickChen\Documents\Visual Studio 2015\Projects\TestDAO\packages\mongocsharpdriver.2.2.0\lib\net45\MongoDB.Driver.Legacy.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">

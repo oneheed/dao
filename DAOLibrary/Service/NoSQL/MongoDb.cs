@@ -89,7 +89,7 @@ namespace DAOLibrary.Service.NoSQL
                 var data = o as MongoCRUDObj;
                 var c = _db.GetCollection(data.Collection);
                 var result = c.Update(data.QueryFilter, data.UpdateData, UpdateFlags.Multi);
-                return result.Ok;
+                return !result.HasLastErrorMessage;
             }, obj);
         }
 
