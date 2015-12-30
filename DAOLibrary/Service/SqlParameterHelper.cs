@@ -194,7 +194,7 @@ namespace DAOLibrary
                 sqlParameterValue = new object[] { };
 
             var sqlParamList = new List<SqlParameter>();
-            int paramValueLen = dbObj.ProcedureList[commandTextString].ParameterObjs.Count;
+            int paramValueLen = dbObj.ProcedureList[procedureKey].ParameterObjs.Count;
             if (paramValueLen > 0)
             {
                 object[] parameterValue = new object[paramValueLen];
@@ -204,7 +204,7 @@ namespace DAOLibrary
                 {
                     int paramIdx = 0;
 
-                    foreach (var value in dbObj.ProcedureList[commandTextString].ParameterObjs)
+                    foreach (var value in dbObj.ProcedureList[procedureKey].ParameterObjs)
                     {
                         SqlDbType sqlDbType = TryGetSqlDbType(value);
                         object parameterString = parameterValue[paramIdx] == null ? DBNull.Value : parameterValue[paramIdx];
