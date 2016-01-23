@@ -96,7 +96,8 @@ namespace DAOLibrary
             sqlParameterValue.TryGetValue(value.Parameter.Replace("@", ""), out parameterString);
 
             #region Process Json to DataTable
-            if (parameterString == null || parameterString.ToString().Replace(" ", "") == "[]")
+            if (parameterString == null || parameterString.ToString().Replace(" ", "") == "[]" ||
+                ((parameterString.GetType() == typeof(DataTable) && ((DataTable)parameterString).Rows.Count == 0)))
             {
                 if (value.Parameter.StartsWith("@tb"))
                     parameterString = OutPutColumns(decodeConnectionString, procedureKey, value.Parameter.Replace("@tbl", ""));
