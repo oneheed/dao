@@ -66,14 +66,25 @@ namespace DAOLibrary.Service
                                         pObj.DefaultValue = param["DefaultValue"].ToString();
                                         parameterObjs.Add(pObj);
                                     }
-
-                                    newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                    if (newDbObj.ProcedureList.ContainsKey(procedureKeyString))
                                     {
-                                        ProcedureName = dr["Name"].ToString(),
-                                        DBName = dr["DBName"].ToString(),
-                                        DBServer = dr["ServerIP"].ToString(),
-                                        ParameterObjs = parameterObjs
-                                    });
+                                        throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
+                                    }
+
+                                    try
+                                    {
+                                        newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                        {
+                                            ProcedureName = dr["Name"].ToString(),
+                                            DBName = dr["DBName"].ToString(),
+                                            DBServer = dr["ServerIP"].ToString(),
+                                            ParameterObjs = parameterObjs
+                                        });
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        throw new Exception(string.Format("{0}: {1}", e.Message, procedureKeyString));
+                                    }
                                 }
                             }
                             newDbObj.UpdateTime = DateTime.Now;

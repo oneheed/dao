@@ -34,6 +34,8 @@ namespace DAOLibrary
             throw new Exception(string.Format("Cannot get db server for {0}", procedureKey));
         }
 
+
+        public abstract List<string> GetSqlParameterNames(string procedureKey);
         public abstract int ExecuteSp(string procedureKey, params object[] sqlParameterValue);
         public abstract int ExecuteSp(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue);
         public abstract int ExecuteSp(string procedureKey, Dictionary<string, object> sqlParameterValue);

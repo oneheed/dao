@@ -101,29 +101,33 @@ namespace DAOLibrary
         {
             using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
             {
-                SqlCommand cmd = new SqlCommand(cmdStr, conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = timeout > 0 ? timeout : 30;
-                cmd.Parameters.AddRange(sqlParameterList.ToArray());
-                SqlDataAdapter sa = new SqlDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                sa.Fill(ds);
-                return ds;
+                using (SqlCommand cmd = new SqlCommand(cmdStr, conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = timeout > 0 ? timeout : 30;
+                    cmd.Parameters.AddRange(sqlParameterList.ToArray());
+                    SqlDataAdapter sa = new SqlDataAdapter(cmd);
+                    DataSet ds = new DataSet();
+                    sa.Fill(ds);
+                    return ds;
+                }
             }
         }
         private List<T> GetDataStructList<T>(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30) where T : new()
         {
             using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
             {
-                SqlCommand cmd = new SqlCommand(cmdStr, conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddRange(sqlParameterList.ToArray());
-                cmd.CommandTimeout = timeout > 0 ? timeout : 30;
-                conn.Open();
-                SqlDataReader sr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                T outputDataStruct = new T();
-                List<T> dataStructList = SqlDataAccess.SqlDataReaderToObjectList<T>(ref outputDataStruct, sr);
-                return dataStructList;
+                using (SqlCommand cmd = new SqlCommand(cmdStr, conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddRange(sqlParameterList.ToArray());
+                    cmd.CommandTimeout = timeout > 0 ? timeout : 30;
+                    conn.Open();
+                    SqlDataReader sr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    T outputDataStruct = new T();
+                    List<T> dataStructList = SqlDataAccess.SqlDataReaderToObjectList<T>(ref outputDataStruct, sr);
+                    return dataStructList;
+                }
             }
         }
 
@@ -423,6 +427,30 @@ namespace DAOLibrary
             catch
             {
                 throw;
+            }
+        }
+
+        public override List<string> GetSqlParameterNames(string procedureKey)
+        {
+            try
+            {
+                if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
+                {
+                    StoredProcedurePool.UpdateProcedure(decodeConnectionString);
+                }
+
+                if (!StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList.ContainsKey(procedureKey))
+                {
+                    return null;
+                }
+
+                var paramList = StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList[procedureKey].ParameterObjs;
+                return (from p in paramList
+                        select p.Parameter).ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }
