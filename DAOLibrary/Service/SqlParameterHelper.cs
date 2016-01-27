@@ -39,21 +39,23 @@ namespace DAOLibrary
         private static DataTable OutPutColumns(string decodeConnectionString, string SpName, string ColumnName)
         {
             string strComment = string.Format(Const.TMP_GET_USER_DEFINED_TABLE_COL_COUNT, SpName, ColumnName);
-            SqlDataAdapter saCount = new SqlDataAdapter(strComment, decodeConnectionString);
-
-            DataTable dtCount = new DataTable();
-            saCount.Fill(dtCount);
-
-            int _procedureKey = int.Parse(dtCount.Rows[0]["Counts"].ToString());
-
-            DataTable dt = new DataTable();
-
-            for (int i = 0; i < _procedureKey; i++)
+            using (SqlDataAdapter saCount = new SqlDataAdapter(strComment, decodeConnectionString))
             {
-                dt.Columns.Add();
-            }
 
-            return dt;
+                DataTable dtCount = new DataTable();
+                saCount.Fill(dtCount);
+
+                int _procedureKey = int.Parse(dtCount.Rows[0]["Counts"].ToString());
+
+                DataTable dt = new DataTable();
+
+                for (int i = 0; i < _procedureKey; i++)
+                {
+                    dt.Columns.Add();
+                }
+
+                return dt;
+            }
         }
 
         private static DbObj TryGetDbObj(string decodeConnectionString, string procedureKey)

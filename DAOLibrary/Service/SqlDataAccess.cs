@@ -99,18 +99,29 @@ namespace DAOLibrary
         }
         private DataSet GetDataSet(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30)
         {
-            using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
+            try
             {
-                using (SqlCommand cmd = new SqlCommand(cmdStr, conn))
+                using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = timeout > 0 ? timeout : 30;
-                    cmd.Parameters.AddRange(sqlParameterList.ToArray());
-                    SqlDataAdapter sa = new SqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    sa.Fill(ds);
-                    return ds;
+                    using (SqlCommand cmd = new SqlCommand(cmdStr, conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandTimeout = timeout > 0 ? timeout : 30;
+                        cmd.Parameters.AddRange(sqlParameterList.ToArray());
+                        using (SqlDataAdapter sa = new SqlDataAdapter(cmd))
+                        {
+                            using (DataSet ds = new DataSet())
+                            {
+                                sa.Fill(ds);
+                                return ds;
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                throw;
             }
         }
         private List<T> GetDataStructList<T>(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30) where T : new()
@@ -135,6 +146,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return Execute(sqlParameterList, procedureKey, commandTextString);
@@ -148,6 +160,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -165,6 +178,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString);
@@ -178,6 +192,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
@@ -191,6 +206,8 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -207,6 +224,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -224,6 +242,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
@@ -237,6 +256,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
@@ -250,6 +270,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -266,6 +287,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -285,6 +307,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return Execute(sqlParameterList, procedureKey, commandTextString);
@@ -298,6 +321,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -315,6 +339,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString);
@@ -328,6 +353,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
@@ -341,6 +367,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -358,6 +385,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -375,6 +403,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
@@ -388,6 +417,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
@@ -401,6 +431,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -417,6 +448,7 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
                 var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
@@ -434,12 +466,13 @@ namespace DAOLibrary
         {
             try
             {
+                procedureKey = procedureKey.ToLower();
                 if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
                 {
                     StoredProcedurePool.UpdateProcedure(decodeConnectionString);
                 }
 
-                if (!StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList.ContainsKey(procedureKey))
+                if (!StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList.ContainsKey(procedureKey.ToLower()))
                 {
                     return null;
                 }
