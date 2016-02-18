@@ -70,7 +70,34 @@ namespace DAOLibrary.Service.NoSQL
         }
         #endregion
 
+        public bool BulkInsert(MongoCRUDObj obj)
+        {
+            return Run<object, bool>((o) =>
+            {
+                var data = o as MongoCRUDObj;
+                var c = _db.GetCollection(data.Collection);
+                var bulk = c.InitializeUnorderedBulkOperation();
+                foreach (var sObj in obj.BulkInsertData)
+                {
+                    bulk.Insert(sObj.ToBsonDocument());
+                }
+                bulk.Execute();
+                return true;
+            }, obj);
+        }
+
         #region CRUD
+        public bool Upsert(MongoCRUDObj obj)
+        {
+            return Run<object, bool>((o) =>
+            {
+                var data = o as MongoCRUDObj;
+                var c = _db.GetCollection(data.Collection);
+                c.Update(data.QueryFilter, data.UpdateData, UpdateFlags.Upsert);
+                return true;
+            }, obj);
+        }
+
         public bool Insert(MongoCRUDObj obj)
         {
             return Run<object, bool>((o) =>
