@@ -11,7 +11,7 @@ namespace DAOLibrary.Model
     {
         public string Collection { get; set; }
         public object InsertData { get; set; }
-        public List<object> BulkInsertData { get; set; }
+        public IEnumerable<object> BulkInsertData { get; set; }
         public IMongoQuery QueryFilter { get; set; }
         public IMongoUpdate UpdateData { get; set; }
         public IMongoSortBy SortKeys { get; set; }
