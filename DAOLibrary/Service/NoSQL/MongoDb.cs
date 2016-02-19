@@ -70,6 +70,12 @@ namespace DAOLibrary.Service.NoSQL
         }
         #endregion
 
+        #region CRUD
+        /// <summary>
+        /// 批次insert
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public bool BulkInsert(MongoCRUDObj obj)
         {
             return Run<object, bool>((o) =>
@@ -86,7 +92,11 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
-        #region CRUD
+        /// <summary>
+        /// 如果資料已存在則update, 反之insert
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public bool Upsert(MongoCRUDObj obj)
         {
             return Run<object, bool>((o) =>
@@ -98,6 +108,11 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
+        /// <summary>
+        /// 塞入資料
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public bool Insert(MongoCRUDObj obj)
         {
             return Run<object, bool>((o) =>
@@ -109,6 +124,11 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
+        /// <summary>
+        /// 更新資料
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public bool Update(MongoCRUDObj obj)
         {
             return Run<object, bool>((o) =>
@@ -120,6 +140,11 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
+        /// <summary>
+        /// 更新符合查詢條件的資料並回傳查詢結果
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public IEnumerable<BsonDocument> QueryAndUpdate(MongoCRUDObj obj)
         {
             return Run<object, List<BsonDocument>>((o) =>
@@ -137,6 +162,12 @@ namespace DAOLibrary.Service.NoSQL
             }, obj);
         }
 
+        /// <summary>
+        /// 根據輸入的欲查詢筆數回傳查詢結果
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
         public IEnumerable<BsonDocument> Query(MongoCRUDObj obj, int num = int.MaxValue)
         {
             return Run<object, List<BsonDocument>>((d) =>
@@ -148,6 +179,34 @@ namespace DAOLibrary.Service.NoSQL
                     return c.FindAs<BsonDocument>(data.QueryFilter).SetSortOrder(obj.SortKeys).SetLimit(num).ToList();
                 }
                 return c.FindAs<BsonDocument>(data.QueryFilter).SetLimit(num).ToList();
+            }, obj);
+        }
+
+        /// <summary>
+        /// 回傳結果與符合條件的總筆數
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="idx"></param>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public Tuple<IEnumerable<BsonDocument>, long> QueryPaging(MongoCRUDObj obj, int idx, int num)
+        {
+            return Run<object, Tuple<IEnumerable<BsonDocument>, long>>((d) =>
+            {
+                var data = obj as MongoCRUDObj;
+                var c = _db.GetCollection(data.Collection);
+                if (obj.SortKeys != null)
+                {
+                    var rSort = c.FindAs<BsonDocument>(data.QueryFilter).SetSortOrder(obj.SortKeys);
+                    var rResult = rSort.SetSkip((idx - 1) * num).SetLimit(num);
+                    var rSize = rSort.Count();
+                    return new Tuple<IEnumerable<BsonDocument>, long>(rResult, rSize);
+
+                }
+                var r = c.FindAs<BsonDocument>(data.QueryFilter);
+                var result = r.SetSkip((idx - 1) * num).SetLimit(num);
+                var size = r.Count();
+                return new Tuple<IEnumerable<BsonDocument>, long>(result, size);
             }, obj);
         }
 
