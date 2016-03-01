@@ -8,11 +8,18 @@ using System.Linq;
 
 namespace DAOLibrary.Service
 {
+    /// <summary>
+    /// SP 清單池
+    /// </summary>
     public class StoredProcedurePool
     {
         private static ConcurrentDictionary<string, DbObj> _DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
         private static object lockObj = new object();
         private static int _updateSec = 60;
+        /// <summary>
+        /// 設定多久更新記憶體中的SP清單
+        /// </summary>
+        /// <param name="sec"></param>
         internal protected static void SetProcedureUpdateSecond(int sec)
         {
             lock (lockObj)
@@ -21,11 +28,15 @@ namespace DAOLibrary.Service
             }
         }
 
-        public static Dictionary<string, DbObj> DbProcedures
+        public static IDictionary<string, DbObj> DbProcedures
         {
-            get { return new Dictionary<string, DbObj>(_DbProcedures); }
+            get { return _DbProcedures; }
         }
 
+        /// <summary>
+        /// 更新SP清單
+        /// </summary>
+        /// <param name="connectionString"></param>
         public static void UpdateProcedure(string connectionString)
         {
             try

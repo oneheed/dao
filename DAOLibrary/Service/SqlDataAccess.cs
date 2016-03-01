@@ -8,6 +8,9 @@ using System.Reflection;
 
 namespace DAOLibrary
 {
+    /// <summary>
+    /// MS-SQL 的存取物件
+    /// </summary>
     public class SqlDataAccess : IDataAccess
     {
         public SqlDataAccess(string connectionString, bool isTest = false, int procUpdateSec = 60)
@@ -119,7 +122,7 @@ namespace DAOLibrary
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 throw;
             }
@@ -134,10 +137,12 @@ namespace DAOLibrary
                     cmd.Parameters.AddRange(sqlParameterList.ToArray());
                     cmd.CommandTimeout = timeout > 0 ? timeout : 30;
                     conn.Open();
-                    SqlDataReader sr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                    T outputDataStruct = new T();
-                    List<T> dataStructList = SqlDataAccess.SqlDataReaderToObjectList<T>(ref outputDataStruct, sr);
-                    return dataStructList;
+                    using (SqlDataReader sr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
+                    {
+                        T outputDataStruct = new T();
+                        List<T> dataStructList = SqlDataAccess.SqlDataReaderToObjectList<T>(ref outputDataStruct, sr);
+                        return dataStructList;
+                    }
                 }
             }
         }

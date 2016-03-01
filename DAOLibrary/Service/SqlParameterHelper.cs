@@ -86,7 +86,7 @@ namespace DAOLibrary
             else
                 sqlDbTypeKey = value.SqlType.ToUpper();
 
-            DbDictionary.mappingSqlDbType().TryGetValue(sqlDbTypeKey, out sqlDbType);
+            DbDictionary.MappingSqlDbType.TryGetValue(sqlDbTypeKey, out sqlDbType);
             return sqlDbType;
         }
         #endregion
@@ -211,9 +211,7 @@ namespace DAOLibrary
                     {
                         SqlDbType sqlDbType = TryGetSqlDbType(value);
                         object parameterString = parameterValue[paramIdx] == null ? DBNull.Value : parameterValue[paramIdx];
-
                         sqlParamList.Add(TryGetSqlParamter(value, sqlDbType, parameterString));
-
                         paramIdx++;
                     }
                 }

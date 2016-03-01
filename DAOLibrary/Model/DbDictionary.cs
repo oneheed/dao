@@ -7,50 +7,49 @@ using System.Threading.Tasks;
 
 namespace DAOLibrary
 {
-
+    /// <summary>
+    /// MS-SQL and C# 的設定對應
+    /// </summary>
     public static class DbDictionary
     {
-        private static Dictionary<string, SqlDbType> dic = new Dictionary<string, SqlDbType>();
-        public static Dictionary<string, SqlDbType> mappingSqlDbType()
+        /// <summary>
+        /// SqlDbType的對應
+        /// </summary>
+        public static readonly Dictionary<string, SqlDbType> MappingSqlDbType = new Dictionary<string, SqlDbType>()
         {
-            if (dic.Count > 0)
-                return dic;
-
-            dic.Add("BIGINT", SqlDbType.BigInt);
-            dic.Add("BINARY", SqlDbType.VarBinary);
-            dic.Add("BIT", SqlDbType.Bit);
-            dic.Add("CHAR", SqlDbType.Char);
-            dic.Add("DATE", SqlDbType.Date);
-            dic.Add("DATETIME", SqlDbType.DateTime);
-            dic.Add("DATETIME2", SqlDbType.DateTime2);
-            dic.Add("DATETIMEOFFSET", SqlDbType.DateTimeOffset);
-            dic.Add("DECIMAL", SqlDbType.Decimal);
-            dic.Add("FLOAT", SqlDbType.Float);
-            dic.Add("IMAGE", SqlDbType.Image);
-            dic.Add("INT", SqlDbType.Int);
-            dic.Add("MONEY", SqlDbType.Money);
-            dic.Add("NCHAR", SqlDbType.NChar);
-            dic.Add("NTEXT", SqlDbType.NText);
-            dic.Add("NVARCHAR", SqlDbType.NVarChar);
-            dic.Add("REAL", SqlDbType.Real);
-            dic.Add("ROWVERSION", SqlDbType.Timestamp);
-            dic.Add("SMALLDATETIME", SqlDbType.SmallDateTime);
-            dic.Add("SMALLINT", SqlDbType.SmallInt);
-            dic.Add("SMALLMONEY", SqlDbType.SmallMoney);
-            dic.Add("STRUCTURED", SqlDbType.Structured);
-            dic.Add("TEXT", SqlDbType.Text);
-            dic.Add("TIME", SqlDbType.Time);
-            dic.Add("TIMESTAMP", SqlDbType.Timestamp);
-            dic.Add("TINYINT", SqlDbType.TinyInt);
-            dic.Add("UDT", SqlDbType.Udt);
-            dic.Add("UNIQUEIDENTIFIER", SqlDbType.UniqueIdentifier);
-            dic.Add("VARBINARY", SqlDbType.VarBinary);
-            dic.Add("VARCHAR", SqlDbType.VarChar);
-            dic.Add("VARIANT", SqlDbType.Variant);
-            dic.Add("XML", SqlDbType.Xml);
-
-            return dic;
-        }
+            {"BIGINT", SqlDbType.BigInt},
+            {"BINARY", SqlDbType.VarBinary},
+            {"BIT", SqlDbType.Bit},
+            {"CHAR", SqlDbType.Char},
+            {"DATE", SqlDbType.Date},
+            {"DATETIME", SqlDbType.DateTime},
+            {"DATETIME2", SqlDbType.DateTime2},
+            {"DATETIMEOFFSET", SqlDbType.DateTimeOffset},
+            {"DECIMAL", SqlDbType.Decimal},
+            {"FLOAT", SqlDbType.Float},
+            {"IMAGE", SqlDbType.Image},
+            {"INT", SqlDbType.Int},
+            {"MONEY", SqlDbType.Money},
+            {"NCHAR", SqlDbType.NChar},
+            {"NTEXT", SqlDbType.NText},
+            {"NVARCHAR", SqlDbType.NVarChar},
+            {"REAL", SqlDbType.Real},
+            {"ROWVERSION", SqlDbType.Timestamp},
+            {"SMALLDATETIME", SqlDbType.SmallDateTime},
+            {"SMALLINT", SqlDbType.SmallInt},
+            {"SMALLMONEY", SqlDbType.SmallMoney},
+            {"STRUCTURED", SqlDbType.Structured},
+            {"TEXT", SqlDbType.Text},
+            {"TIME", SqlDbType.Time},
+            {"TIMESTAMP", SqlDbType.Timestamp},
+            {"TINYINT", SqlDbType.TinyInt},
+            {"UDT", SqlDbType.Udt},
+            {"UNIQUEIDENTIFIER", SqlDbType.UniqueIdentifier},
+            {"VARBINARY", SqlDbType.VarBinary},
+            {"VARCHAR", SqlDbType.VarChar},
+            {"VARIANT", SqlDbType.Variant},
+            {"XML", SqlDbType.Xml}
+        };
     }
 }
 

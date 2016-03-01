@@ -8,10 +8,23 @@ using System.Threading.Tasks;
 
 namespace DAOLibrary
 {
+    /// <summary>
+    /// 資料存取物件的介面
+    /// </summary>
     public abstract class IDataAccess
     {
+        /// <summary>
+        /// 解密後的connection string
+        /// </summary>
         protected string decodeConnectionString = string.Empty;
         private bool _isTest = false;
+
+        /// <summary>
+        /// 建構子
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="isTest"></param>
+        /// <param name="procUpdateSec"></param>
         public IDataAccess(string connectionString, bool isTest, int procUpdateSec)
         {
             decodeConnectionString = Cryptography.DESDecode(connectionString);
@@ -19,6 +32,11 @@ namespace DAOLibrary
             StoredProcedurePool.SetProcedureUpdateSecond(procUpdateSec);
         }
 
+        /// <summary>
+        /// 取得該procedure key 真正要被執行時的server
+        /// </summary>
+        /// <param name="procedureKey"></param>
+        /// <returns></returns>
         protected string GetSqlConnectionStr(string procedureKey)
         {
             foreach (var connStr in StoredProcedurePool.DbProcedures.Keys)
