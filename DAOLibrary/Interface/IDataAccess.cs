@@ -46,6 +46,7 @@ namespace DAOLibrary
                     if (proc.Key.Equals(procedureKey))
                     {
                         return string.Format(Const.TMP_MSSQL_CONN_STR, proc.Value.DBServer, proc.Value.DBName, !_isTest, "nickchen", "just4nick");
+                        //return decodeConnectionString;
                     }
                 }
             }
