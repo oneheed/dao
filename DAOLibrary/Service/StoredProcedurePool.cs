@@ -15,7 +15,7 @@ namespace DAOLibrary.Service
     {
         private static ConcurrentDictionary<string, DbObj> _DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
         private static object lockObj = new object();
-        private static int _updateSec = 60;
+        private static int _updateSec = 86400;
         /// <summary>
         /// 設定多久更新記憶體中的SP清單
         /// </summary>

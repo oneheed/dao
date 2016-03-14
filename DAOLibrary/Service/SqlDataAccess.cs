@@ -13,7 +13,7 @@ namespace DAOLibrary
     /// </summary>
     public class SqlDataAccess : IDataAccess
     {
-        public SqlDataAccess(string connectionString, bool isTest = false, int procUpdateSec = 60)
+        public SqlDataAccess(string connectionString, bool isTest = false, int procUpdateSec = 86400)
             : base(connectionString, isTest, procUpdateSec) { }
 
         private static List<T> SqlDataReaderToObjectList<T>(ref T outputObject, SqlDataReader sqlDataReader) where T : new()
