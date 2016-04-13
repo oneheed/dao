@@ -14,6 +14,12 @@ namespace DAOLibrary.Model
         public IEnumerable<object> BulkInsertData { get; set; }
         public IMongoQuery QueryFilter { get; set; }
         public IMongoUpdate UpdateData { get; set; }
+        public UpdateFlags UpdateFlag { get; set; }
         public IMongoSortBy SortKeys { get; set; }
+
+        public MongoCRUDObj()
+        {
+            this.UpdateFlag = UpdateFlags.None;
+        }
     }
 }
