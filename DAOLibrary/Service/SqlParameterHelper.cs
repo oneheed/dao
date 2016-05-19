@@ -139,7 +139,8 @@ namespace DAOLibrary
                     var sqlDbType = TryGetSqlDbType(value);
                     var parameterValue = ConvertParamValue(sqlParameterValue, value, decodeConnectionString, procedureKey);
                     var sqlParam = TryGetSqlParamter(value, sqlDbType, parameterValue);
-                    sqlparameterlist.Add(sqlParam);
+                    if (sqlParameterValue.ContainsKey(sqlParam.ParameterName.Replace("@", "")) || sqlParam.Direction == ParameterDirection.Output)
+                        sqlparameterlist.Add(sqlParam);
                 }
                 //}
                 //else

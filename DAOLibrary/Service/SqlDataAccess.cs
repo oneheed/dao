@@ -122,11 +122,18 @@ namespace DAOLibrary
                     }
                 }
             }
-            catch
+            catch (SqlException se)
             {
-                throw;
+                if (se.Number == 201)
+                    throw new Exception(Const.PARAM_NOT_MATCH);
+                throw se;
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
+
         private List<T> GetDataStructList<T>(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30) where T : new()
         {
             using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
@@ -211,7 +218,6 @@ namespace DAOLibrary
         {
             try
             {
-                procedureKey = procedureKey.ToLower();
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
