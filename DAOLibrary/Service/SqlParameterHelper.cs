@@ -132,20 +132,20 @@ namespace DAOLibrary
                 var paramNameFromDB = paramsFromDb.Where(o => o.OutputFlag == true)
                                                   .Select((o) => { return o.Parameter.ToUpper().Replace("@", ""); }).ToList();
                 var cnt = sqlParameterValue.Where(o => !paramNameFromDB.Contains(o.Key.ToUpper())).Count();
-                if (parameterValueLength == cnt)
+                //if (parameterValueLength == cnt)
+                //{
+                foreach (var value in dbObj.ProcedureList[procedureKey].ParameterObjs)
                 {
-                    foreach (var value in dbObj.ProcedureList[procedureKey].ParameterObjs)
-                    {
-                        var sqlDbType = TryGetSqlDbType(value);
-                        var parameterValue = ConvertParamValue(sqlParameterValue, value, decodeConnectionString, procedureKey);
-                        var sqlParam = TryGetSqlParamter(value, sqlDbType, parameterValue);
-                        sqlparameterlist.Add(sqlParam);
-                    }
+                    var sqlDbType = TryGetSqlDbType(value);
+                    var parameterValue = ConvertParamValue(sqlParameterValue, value, decodeConnectionString, procedureKey);
+                    var sqlParam = TryGetSqlParamter(value, sqlDbType, parameterValue);
+                    sqlparameterlist.Add(sqlParam);
                 }
-                else
-                {
-                    throw new Exception(Const.PARAM_NOT_MATCH);
-                }
+                //}
+                //else
+                //{
+                //    throw new Exception(Const.PARAM_NOT_MATCH);
+                //}
             }
             return sqlparameterlist;
         }
