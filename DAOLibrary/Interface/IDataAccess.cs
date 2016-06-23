@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.SqlClient;
 
 namespace DAOLibrary
 {
@@ -45,8 +46,11 @@ namespace DAOLibrary
                 {
                     if (proc.Key.Equals(procedureKey))
                     {
-                        return string.Format(Const.TMP_MSSQL_CONN_STR, proc.Value.DBServer, proc.Value.DBName, !_isTest, "nickchen", "just4nick");
-                        //return decodeConnectionString;
+                        SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connStr);
+                        string user = builder.UserID;
+                        string pass = builder.Password;
+                        return string.Format(Const.TMP_MSSQL_CONN_STR, proc.Value.DBServer, proc.Value.DBName, !_isTest, user, pass);
+                        //return connStr;
                     }
                 }
             }
