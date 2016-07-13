@@ -80,7 +80,8 @@ namespace DAOLibrary.Service
                                                 parameterObjs.Add(pObj);
                                             }
 
-                                            if (newDbObj.ProcedureList.ContainsKey(procedureKeyString))
+                                            if (newDbObj.ProcedureList.ContainsKey(procedureKeyString) || 
+                                                _DbProcedures.Where(o => o.Value.ProcedureList.ContainsKey(procedureKeyString)).Count() > 0)
                                             {
                                                 throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
                                             }

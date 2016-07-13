@@ -17,7 +17,8 @@ namespace DAOLibrary
         /// <summary>
         /// 解密後的connection string
         /// </summary>
-        protected string decodeConnectionString = string.Empty;
+        //protected string decodeConnectionString = string.Empty;
+        protected List<string> connectionStringList;
         private bool _isTest = false;
 
         /// <summary>
@@ -28,10 +29,38 @@ namespace DAOLibrary
         /// <param name="procUpdateSec"></param>
         public IDataAccess(string connectionString, bool isTest, int procUpdateSec)
         {
-            decodeConnectionString = Cryptography.DESDecode(connectionString);
+            if (connectionStringList == null)
+            {
+                connectionStringList = new List<string>();
+            }
+
+            var decodeConnectionString = Cryptography.DESDecode(connectionString);
+            connectionStringList.Add(decodeConnectionString);
             _isTest = isTest;
             StoredProcedurePool.SetProcedureUpdateSecond(procUpdateSec);
         }
+
+        /// <summary>
+        /// 建構子
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="isTest"></param>
+        /// <param name="procUpdateSec"></param>
+        public IDataAccess(List<string> encodeConnectionStringList, bool isTest, int procUpdateSec)
+        {
+            if (this.connectionStringList == null)
+            {
+                connectionStringList = new List<string>();
+            }
+
+            foreach (var conn in encodeConnectionStringList)
+            {
+                this.connectionStringList.Add(Cryptography.DESDecode(conn));
+            }
+            _isTest = isTest;
+            StoredProcedurePool.SetProcedureUpdateSecond(procUpdateSec);
+        }
+
 
         /// <summary>
         /// 取得該procedure key 真正要被執行時的server
