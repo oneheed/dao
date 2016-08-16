@@ -55,7 +55,8 @@ namespace DAOLibrary
 
             foreach (var conn in encodeConnectionStringList)
             {
-                this.connectionStringList.Add(Cryptography.DESDecode(conn));
+                this.connectionStringList.Add(conn);
+                //this.connectionStringList.Add(Cryptography.DESDecode(conn));
             }
             _isTest = isTest;
             StoredProcedurePool.SetProcedureUpdateSecond(procUpdateSec);
