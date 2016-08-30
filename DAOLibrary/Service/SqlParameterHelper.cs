@@ -60,7 +60,9 @@ namespace DAOLibrary
 
         private static DbObj TryGetDbObj(string decodeConnectionString, string procedureKey)
         {
-            StoredProcedurePool.UpdateProcedure(decodeConnectionString);
+            if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
+                StoredProcedurePool.UpdateProcedure(decodeConnectionString);
+
             if (StoredProcedurePool.DbProcedures == null || StoredProcedurePool.DbProcedures.Count == 0)
                 throw new Exception(Const.CANNOT_GET_SP_LIST);
 
