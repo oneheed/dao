@@ -83,7 +83,6 @@
     <Compile Include="Service\StoredProcedurePool.cs" />
     <Compile Include="Service\SqlParameterHelper.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
