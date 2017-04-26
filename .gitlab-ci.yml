@@ -17,10 +17,10 @@ build_job:
 #        - TIME /t > %TIME:~0,2%%TIME:~3,2%.txt
         - echo %CD%
         - echo %CI_PIPELINE_ID%
-        - cd DAOLibrary
+#        - cd DAOLibrary
         - c:\Multi-Runner\nuget restore
         - echo %CD%
-        -  '"c:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /p:outputpath=build_output ..\DAOLibrary.sln'
+        -  '"c:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe" /p: /p:Configuration=Release /p:Platform="Any CPU" /p:outputpath=build_output DAOLibrary.sln'
         - md artifacts
         - xcopy /e /i DAOLibrary\build_output\DAOLibrary artifacts\build
     artifacts:
