@@ -22,7 +22,7 @@ build_job:
         - echo %CD%
         -  '"c:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /p:outputpath=build_output DAOLibrary.sln'
         - md artifacts
-        - xcopy /e /i DAOLibrary\build_output\DAOLibrary artifacts\build
+        - xcopy /e /i DAOLibrary\build_output artifacts\build
     artifacts:
       name: daolibrary-binary
       when: on_success
