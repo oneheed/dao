@@ -79,7 +79,13 @@ namespace DAOLibrary
                         SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connStr);
                         string user = builder.UserID;
                         string pass = builder.Password;
-                        return string.Format(Const.TMP_MSSQL_CONN_STR, proc.Value.DBServer, proc.Value.DBName, user, pass);
+                        string appName = builder.ApplicationName;
+                        string conn_fmt_Str = string.Format(Const.TMP_MSSQL_CONN_STR, proc.Value.DBServer, proc.Value.DBName, user, pass);
+                        if (!String.IsNullOrEmpty(appName))
+                        {
+                            conn_fmt_Str = string.Format(Const.TMP_MSSQL_CONN_STR_WITH_APPNAME, proc.Value.DBServer, proc.Value.DBName, user, pass, appName);
+                        }
+                        return conn_fmt_Str;
                         //return connStr;
                     }
                 }

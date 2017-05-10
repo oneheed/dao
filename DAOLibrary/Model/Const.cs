@@ -12,6 +12,7 @@ namespace DAOLibrary
         public const string TMP_MONGODB_CONN_STR = "mongodb://{0}";
 
         public const string TMP_MSSQL_CONN_STR = @"Data Source={0};Initial Catalog={1};user={2};password={3}";
+        public const string TMP_MSSQL_CONN_STR_WITH_APPNAME = @"Data Source={0};Initial Catalog={1};user={2};password={3};Application Name={4}";
 
         public const string TMP_GET_USER_DEFINED_TABLE_COL_COUNT = "Exec usp_getUserDefinedTableColCount {0},{1}";
         public const string GET_PROCEDURE_PARAMETER_COUNT = "Exec usp_getProcedureParameterCount";
