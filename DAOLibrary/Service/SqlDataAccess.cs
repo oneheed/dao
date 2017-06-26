@@ -16,6 +16,9 @@ namespace DAOLibrary
         public SqlDataAccess(string connectionString, bool isTest = false, int procUpdateSec = 86400)
             : base(connectionString, isTest, procUpdateSec) { }
 
+        public SqlDataAccess(List<string> connectionStringList, bool isTest = false, int procUpdateSec = 86400)
+            : base(connectionStringList, isTest, procUpdateSec) { }
+
         private static List<T> SqlDataReaderToObjectList<T>(ref T outputObject, SqlDataReader sqlDataReader) where T : new()
         {
             List<T> listData = new List<T>();
@@ -83,6 +86,7 @@ namespace DAOLibrary
 
             return listData;
         }
+
         private int Execute(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30)
         {
             using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
@@ -100,6 +104,7 @@ namespace DAOLibrary
                 }
             }
         }
+
         private DataSet GetDataSet(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30)
         {
             try
@@ -122,11 +127,18 @@ namespace DAOLibrary
                     }
                 }
             }
-            catch
+            catch (SqlException se)
             {
-                throw;
+                if (se.Number == 201)
+                    throw new Exception(Const.PARAM_NOT_MATCH);
+                throw se;
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
+
         private List<T> GetDataStructList<T>(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30) where T : new()
         {
             using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
@@ -153,7 +165,9 @@ namespace DAOLibrary
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = new List<SqlParameter>();
+                sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
+
                 return Execute(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -161,6 +175,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override int ExecuteSp(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
@@ -168,7 +183,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = Execute(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
 
@@ -179,13 +194,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -193,13 +209,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, int timeout, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
             }
             catch
@@ -207,15 +224,15 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
-                procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataSet(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
                 return result;
@@ -225,6 +242,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, int timeout, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
@@ -232,7 +250,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
 
@@ -243,13 +261,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -257,13 +276,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, int timeout, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
             }
             catch
@@ -271,6 +291,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
@@ -278,7 +299,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
                 return result;
@@ -288,6 +309,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, int timeout, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
@@ -295,7 +317,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
 
@@ -314,7 +336,7 @@ namespace DAOLibrary
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return Execute(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -322,6 +344,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override int ExecuteSp(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue)
         {
             try
@@ -329,7 +352,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
 
                 var result = Execute(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
@@ -340,13 +363,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, params object[] sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -354,13 +378,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, int timeout, params object[] sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
             }
             catch
@@ -368,6 +393,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue)
         {
             try
@@ -375,7 +401,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
 
                 var result = GetDataSet(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
@@ -386,6 +412,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override DataSet GetDataSetFromSp(string procedureKey, int timeout, ref object[] outputParameterValue, params object[] sqlParameterValue)
         {
             try
@@ -393,7 +420,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
 
                 var result = GetDataSet(sqlParameterList, procedureKey, commandTextString, timeout);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
@@ -404,13 +431,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, params object[] sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
             }
             catch
@@ -418,13 +446,14 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, int timeout, params object[] sqlParameterValue)
         {
             try
             {
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameter(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameter(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue);
                 return GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
             }
             catch
@@ -432,6 +461,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, ref object[] outputParameterValue, params object[] sqlParameterValue)
         {
             try
@@ -439,7 +469,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
                 return result;
@@ -449,6 +479,7 @@ namespace DAOLibrary
                 throw;
             }
         }
+
         public override List<T> GetListFromSp<T>(string procedureKey, int timeout, ref object[] outputParameterValue, params object[] sqlParameterValue)
         {
             try
@@ -456,7 +487,7 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
-                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(decodeConnectionString, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
+                var sqlParameterList = SqlParameterHelper.GetSqlParameterWithOutput(connectionStringList, procedureKey, ref commandTextString, sqlParameterValue, ref outputCount);
                 var result = GetDataStructList<T>(sqlParameterList, procedureKey, commandTextString, timeout);
                 SqlParameterHelper.OutputSqlParameter(sqlParameterList, outputCount, ref outputParameterValue);
                 return result;
@@ -472,19 +503,24 @@ namespace DAOLibrary
             try
             {
                 procedureKey = procedureKey.ToLower();
-                if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
+                for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    StoredProcedurePool.UpdateProcedure(decodeConnectionString);
-                }
+                    if (!StoredProcedurePool.DbProcedures.ContainsKey(connectionStringList[i]))
+                    {
+                        StoredProcedurePool.UpdateProcedure(connectionStringList[i]);
+                    }
 
-                if (!StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList.ContainsKey(procedureKey.ToLower()))
-                {
-                    return null;
-                }
+                    if (!StoredProcedurePool.DbProcedures[connectionStringList[i]].ProcedureList.ContainsKey(procedureKey.ToLower()))
+                    {
+                        if (i < connectionStringList.Count)
+                            continue;
+                    }
 
-                var paramList = StoredProcedurePool.DbProcedures[decodeConnectionString].ProcedureList[procedureKey].ParameterObjs;
-                return (from p in paramList
-                        select p.Parameter).ToList();
+                    var paramList = StoredProcedurePool.DbProcedures[connectionStringList[i]].ProcedureList[procedureKey].ParameterObjs;
+                    return (from p in paramList
+                            select p.Parameter).ToList();
+                }
+                return null;
             }
             catch (Exception e)
             {
