@@ -12,7 +12,7 @@ before_script:
 develop_build_job:
   stage: build
   only:
-  - dev
+  - master
   script:
   - c:\Multi-Runner\nuget.exe restore
   - '"c:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /p:VersionAssembly=%BUILD_VERSION% DAOLibrary.sln'
