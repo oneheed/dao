@@ -1,4 +1,5 @@
 ﻿using DAOLibrary.Model;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ namespace DAOLibrary.Service
         private static object lockObj = new object();
         private static int _updateSec = 86400;
 
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// 設定多久更新記憶體中的SP清單
         /// </summary>
@@ -30,6 +33,9 @@ namespace DAOLibrary.Service
             }
         }
 
+        /// <summary>
+        /// 目前最新版SP清單
+        /// </summary>
         public static ConcurrentDictionary<string, DbObj> DbProcedures
         {
             get {
@@ -63,6 +69,9 @@ namespace DAOLibrary.Service
 
             try
             {
+                _logger.Info(String.Format("Begin UpdateProcedure: current_ver => {0}, loading_ver => {1}", _current_cache_version, _current_loading_version));
+                DateTime beginTime = DateTime.Now;
+                
                 foreach (string connectionString in connectionStringList)
                 {
                     // 取得舊版
@@ -143,11 +152,15 @@ namespace DAOLibrary.Service
                         // remove old version
                         ConcurrentDictionary<string, DbObj> _old_DbProcedures = new ConcurrentDictionary<string, DbObj>();
                         verProcedure.TryRemove(_current_cache_version, out _old_DbProcedures);
+
+                        _logger.Info(String.Format("End UpdateProcedure: {0} milliseconds, current_ver => {1}, loading_ver => {2}", 
+                            (DateTime.Now - beginTime).TotalMilliseconds), _current_cache_version, _current_loading_version);
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
+                _logger.Debug(String.Format("Begin UpdateProcedure: current_ver => {0}, loading_ver => {1}", _current_cache_version, _current_loading_version), e);
                 _current_loading_version = _current_cache_version;
                 throw;
             }
