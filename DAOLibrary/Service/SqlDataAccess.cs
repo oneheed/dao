@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace DAOLibrary
 {
@@ -224,11 +225,17 @@ namespace DAOLibrary
                 throw;
             }
         }
+        public static long ConcurrentDatabaseConnectionCount {
+            get { return _concurrent_database_connection_count; }
+        }
+        private static long _concurrent_database_connection_count = 0;
 
         public override DataSet GetDataSetFromSp(string procedureKey, ref object[] outputParameterValue, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
+                Interlocked.Increment(ref _concurrent_database_connection_count);
+
                 procedureKey = procedureKey.ToLower();
                 var commandTextString = string.Empty;
                 var outputCount = 0;
@@ -240,6 +247,10 @@ namespace DAOLibrary
             catch
             {
                 throw;
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _concurrent_database_connection_count);
             }
         }
 
