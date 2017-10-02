@@ -10,11 +10,9 @@ namespace DAOLibrary.Model
     {
         public Dictionary<string, ProcedureObj> ProcedureList { get; set; }
         public DateTime UpdateTime { get; set; }
-        public bool loadComplete { get; set; }
 
         public DbObj()
         {
-            this.loadComplete = false;
             UpdateTime = DateTime.Now.AddYears(-1);
             ProcedureList = new Dictionary<string, ProcedureObj>();
         }

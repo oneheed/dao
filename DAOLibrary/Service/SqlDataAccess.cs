@@ -516,9 +516,9 @@ namespace DAOLibrary
                 procedureKey = procedureKey.ToLower();
                 for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    if (!StoredProcedurePool.DbProcedures.ContainsKey(connectionStringList[i]))
+                    if (StoredProcedurePool.DbProcedures == null || !StoredProcedurePool.DbProcedures.ContainsKey(connectionStringList[i]))
                     {
-                        StoredProcedurePool.UpdateProcedure(connectionStringList[i]);
+                        StoredProcedurePool.UpdateProcedure(connectionStringList);
                     }
 
                     if (!StoredProcedurePool.DbProcedures[connectionStringList[i]].ProcedureList.ContainsKey(procedureKey.ToLower()))

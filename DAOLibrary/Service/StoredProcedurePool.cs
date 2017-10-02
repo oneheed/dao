@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading;
 
 namespace DAOLibrary.Service
 {
@@ -13,9 +14,10 @@ namespace DAOLibrary.Service
     /// </summary>
     public class StoredProcedurePool
     {
-        private static ConcurrentDictionary<string, DbObj> _DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
+        private static ConcurrentDictionary<long, ConcurrentDictionary<string, DbObj>> verProcedure = new ConcurrentDictionary<long, ConcurrentDictionary<string, DbObj>>();
         private static object lockObj = new object();
         private static int _updateSec = 86400;
+
         /// <summary>
         /// 設定多久更新記憶體中的SP清單
         /// </summary>
@@ -28,171 +30,128 @@ namespace DAOLibrary.Service
             }
         }
 
-        public static IDictionary<string, DbObj> DbProcedures
+        public static ConcurrentDictionary<string, DbObj> DbProcedures
         {
-            get { return _DbProcedures; }
+            get {
+                _wait_first_loading.WaitOne();
+                return verProcedure[_current_cache_version];
+            }
         }
+
+
+
+
+
+        private static long _current_cache_version = 0;
+        private static long _current_loading_version = 0;
+
+
+        private static ManualResetEvent _wait_first_loading = new ManualResetEvent(false);
 
         /// <summary>
         /// 更新SP清單
         /// </summary>
-        /// <param name="connectionString"></param>
-        public static void UpdateProcedure(string connectionString)
+        /// <param name="connectionStringList"></param>
+        //public static void UpdateProcedure(List<string> connectionStringList string connectionString)
+        public static void UpdateProcedure(List<string> connectionStringList)
         {
+            long expected_version = _current_loading_version + 1;
+            if (Interlocked.Increment(ref _current_loading_version) > expected_version)
+            {
+                return;
+            }
+
             try
             {
-                var oriDbObj = _DbProcedures.GetOrAdd(connectionString, (o) => { return new DbObj(); });
-
-                if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > _updateSec)
+                foreach (string connectionString in connectionStringList)
                 {
-                    using (SqlConnection conn = new SqlConnection(connectionString))
+                    // 取得舊版
+                    var oriDbObj = DbProcedures.GetOrAdd(connectionString, (o) => { return new DbObj(); });
+
+                    // 判斷舊版是否需要更新
+                    if ((DateTime.Now - oriDbObj.UpdateTime).TotalSeconds > _updateSec)
                     {
-                        using (SqlDataAdapter sda = new SqlDataAdapter(Const.GET_PROCEDURE_PARAMETER, conn))
+                        // New 空的新版
+                        ConcurrentDictionary<string, DbObj> _new_DbProcedures = new ConcurrentDictionary<string, DbObj>(StringComparer.OrdinalIgnoreCase);
+                        // 開始載入新版
+                        using (SqlConnection conn = new SqlConnection(connectionString))
                         {
-                            using (DataTable dt = new DataTable())
+                            using (SqlDataAdapter sda = new SqlDataAdapter(Const.GET_PROCEDURE_PARAMETER, conn))
                             {
-                                sda.Fill(dt);
-                                var newDbObj = new DbObj();
-                                if (dt.Rows.Count > 0)
+                                using (DataTable dt = new DataTable())
                                 {
-                                    string procedureKeyString = string.Empty;
-                                    foreach (DataRow dr in dt.Rows)
+                                    sda.Fill(dt);
+                                    var newDbObj = new DbObj();
+                                    if (dt.Rows.Count > 0)
                                     {
-                                        if (procedureKeyString != dr["ProcedureKey"].ToString().ToLower())
+                                        string procedureKeyString = string.Empty;
+                                        foreach (DataRow dr in dt.Rows)
                                         {
-                                            procedureKeyString = dr["ProcedureKey"].ToString().ToLower();
-                                            var parameterQuery = (from a in dt.AsEnumerable()
-                                                                  where a.Field<string>("ProcedureKey").ToLower() == procedureKeyString
-                                                                  && a.Field<string>("Parameter") != null
-                                                                  orderby a.Field<byte?>("ParameterIndex") ascending
-                                                                  select a).ToList();
-
-                                            var parameterObjs = new List<ParameterObj>();
-
-                                            foreach (var param in parameterQuery)
+                                            if (procedureKeyString != dr["ProcedureKey"].ToString().ToLower())
                                             {
-                                                var pObj = new ParameterObj();
-                                                pObj.Parameter = param["Parameter"].ToString();
-                                                pObj.SqlType = param["SqlType"].ToString().ToUpper();
-                                                pObj.Length = int.Parse(param["Length"].ToString());
-                                                pObj.OutputFlag = bool.Parse(param["OutputFlag"].ToString());
-                                                pObj.DefaultValue = param["DefaultValue"].ToString();
-                                                parameterObjs.Add(pObj);
-                                            }
+                                                procedureKeyString = dr["ProcedureKey"].ToString().ToLower();
+                                                var parameterQuery = (from a in dt.AsEnumerable()
+                                                                      where a.Field<string>("ProcedureKey").ToLower() == procedureKeyString
+                                                                      && a.Field<string>("Parameter") != null
+                                                                      orderby a.Field<byte?>("ParameterIndex") ascending
+                                                                      select a).ToList();
 
-                                            if (newDbObj.ProcedureList.ContainsKey(procedureKeyString) || 
-                                                _DbProcedures.Where(o => o.Value.ProcedureList.ContainsKey(procedureKeyString)).Count() > 0)
-                                            {
-                                                throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
-                                            }
+                                                var parameterObjs = new List<ParameterObj>();
 
-                                            try
-                                            {
-                                                newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                                foreach (var param in parameterQuery)
                                                 {
-                                                    ProcedureName = dr["Name"].ToString(),
-                                                    DBName = dr["DBName"].ToString(),
-                                                    DBServer = dr["ServerIP"].ToString(),
-                                                    ParameterObjs = parameterObjs
-                                                });
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                throw new Exception(string.Format("{0}: {1}", e.Message, procedureKeyString));
+                                                    var pObj = new ParameterObj();
+                                                    pObj.Parameter = param["Parameter"].ToString();
+                                                    pObj.SqlType = param["SqlType"].ToString().ToUpper();
+                                                    pObj.Length = int.Parse(param["Length"].ToString());
+                                                    pObj.OutputFlag = bool.Parse(param["OutputFlag"].ToString());
+                                                    pObj.DefaultValue = param["DefaultValue"].ToString();
+                                                    parameterObjs.Add(pObj);
+                                                }
+
+                                                if (newDbObj.ProcedureList.ContainsKey(procedureKeyString) ||
+                                                    DbProcedures.Where(o => o.Value.ProcedureList.ContainsKey(procedureKeyString)).Count() > 0)
+                                                {
+                                                    throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
+                                                }
+
+                                                try
+                                                {
+                                                    newDbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                                    {
+                                                        ProcedureName = dr["Name"].ToString(),
+                                                        DBName = dr["DBName"].ToString(),
+                                                        DBServer = dr["ServerIP"].ToString(),
+                                                        ParameterObjs = parameterObjs
+                                                    });
+                                                }
+                                                catch (Exception e)
+                                                {
+                                                    throw new Exception(string.Format("{0}: {1}", e.Message, procedureKeyString));
+                                                }
                                             }
                                         }
+                                        newDbObj.UpdateTime = DateTime.Now;
+                                        _new_DbProcedures.TryAdd(connectionString, newDbObj);
                                     }
-                                    newDbObj.UpdateTime = DateTime.Now;
-                                    _DbProcedures.TryUpdate(connectionString, newDbObj, oriDbObj);
-                                    newDbObj.loadComplete = true;
                                 }
                             }
                         }
+                        verProcedure.TryAdd(_current_loading_version, _new_DbProcedures);
+                        _current_cache_version = _current_loading_version;
+                        _wait_first_loading.Set();
+                        // remove old version
+                        ConcurrentDictionary<string, DbObj> _old_DbProcedures = new ConcurrentDictionary<string, DbObj>();
+                        verProcedure.TryRemove(_current_cache_version, out _old_DbProcedures);
                     }
                 }
             }
             catch
             {
+                _current_loading_version = _current_cache_version;
                 throw;
             }
-        }
 
-        /// <summary>
-        ///當SP清單尚未備妥之前直接查詢DB，取得指定 SP 的參數清單
-        /// </summary>
-        /// <param name="connectionString"></param>
-        /// <param name="procedureKey"></param>
-        public static DbObj GetOneDbObjFromDB(string connectionString, string procedureKey)
-        {
-            DbObj dbObj = new DbObj();
-            if(String.IsNullOrEmpty(connectionString.Trim()) || String.IsNullOrEmpty(procedureKey.Trim()))
-            {
-                return null;
-            }
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string strCommandText = string.Format(Const.GET_ONE_PROCEDURE_PARAMETER, procedureKey);
-                using (SqlDataAdapter sda = new SqlDataAdapter(strCommandText, conn))
-                {
-                    using (DataTable dt = new DataTable())
-                    {
-                        sda.Fill(dt);
-                        if (dt.Rows.Count > 0)
-                        {
-                            string procedureKeyString = string.Empty;
-                            foreach (DataRow dr in dt.Rows)
-                            {
-                                if (procedureKeyString != dr["ProcedureKey"].ToString().ToLower())
-                                {
-                                    procedureKeyString = dr["ProcedureKey"].ToString().ToLower();
-                                    var parameterQuery = (from a in dt.AsEnumerable()
-                                                          where a.Field<string>("ProcedureKey").ToLower() == procedureKeyString
-                                                          && a.Field<string>("Parameter") != null
-                                                          orderby a.Field<byte?>("ParameterIndex") ascending
-                                                          select a).ToList();
-
-                                    var parameterObjs = new List<ParameterObj>();
-
-                                    foreach (var param in parameterQuery)
-                                    {
-                                        var pObj = new ParameterObj();
-                                        pObj.Parameter = param["Parameter"].ToString();
-                                        pObj.SqlType = param["SqlType"].ToString().ToUpper();
-                                        pObj.Length = int.Parse(param["Length"].ToString());
-                                        pObj.OutputFlag = bool.Parse(param["OutputFlag"].ToString());
-                                        pObj.DefaultValue = param["DefaultValue"].ToString();
-                                        parameterObjs.Add(pObj);
-                                    }
-
-                                    if (dbObj.ProcedureList.ContainsKey(procedureKeyString) ||
-                                        _DbProcedures.Where(o => o.Value.ProcedureList.ContainsKey(procedureKeyString)).Count() > 0)
-                                    {
-                                        throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
-                                    }
-
-                                    try
-                                    {
-                                        dbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
-                                        {
-                                            ProcedureName = dr["Name"].ToString(),
-                                            DBName = dr["DBName"].ToString(),
-                                            DBServer = dr["ServerIP"].ToString(),
-                                            ParameterObjs = parameterObjs
-                                        });
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        throw new Exception(string.Format("{0}: {1}", e.Message, procedureKeyString));
-                                    }
-                                }
-                            }
-                            dbObj.UpdateTime = DateTime.Now;
-                            dbObj.loadComplete = true;
-                        }
-                    }
-                }
-            }
-            return dbObj;
         }
 
         //private static void RenewDbProcedure(string connectionString)
