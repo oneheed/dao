@@ -104,6 +104,7 @@ namespace DAOLibrary.Service
                                     }
                                     newDbObj.UpdateTime = DateTime.Now;
                                     _DbProcedures.TryUpdate(connectionString, newDbObj, oriDbObj);
+                                    newDbObj.loadComplete = true;
                                 }
                             }
                         }
@@ -114,6 +115,84 @@ namespace DAOLibrary.Service
             {
                 throw;
             }
+        }
+
+        /// <summary>
+        ///當SP清單尚未備妥之前直接查詢DB，取得指定 SP 的參數清單
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="procedureKey"></param>
+        public static DbObj GetOneDbObjFromDB(string connectionString, string procedureKey)
+        {
+            DbObj dbObj = new DbObj();
+            if(String.IsNullOrEmpty(connectionString.Trim()) || String.IsNullOrEmpty(procedureKey.Trim()))
+            {
+                return null;
+            }
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string strCommandText = string.Format(Const.GET_ONE_PROCEDURE_PARAMETER, procedureKey);
+                using (SqlDataAdapter sda = new SqlDataAdapter(strCommandText, conn))
+                {
+                    using (DataTable dt = new DataTable())
+                    {
+                        sda.Fill(dt);
+                        if (dt.Rows.Count > 0)
+                        {
+                            string procedureKeyString = string.Empty;
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                if (procedureKeyString != dr["ProcedureKey"].ToString().ToLower())
+                                {
+                                    procedureKeyString = dr["ProcedureKey"].ToString().ToLower();
+                                    var parameterQuery = (from a in dt.AsEnumerable()
+                                                          where a.Field<string>("ProcedureKey").ToLower() == procedureKeyString
+                                                          && a.Field<string>("Parameter") != null
+                                                          orderby a.Field<byte?>("ParameterIndex") ascending
+                                                          select a).ToList();
+
+                                    var parameterObjs = new List<ParameterObj>();
+
+                                    foreach (var param in parameterQuery)
+                                    {
+                                        var pObj = new ParameterObj();
+                                        pObj.Parameter = param["Parameter"].ToString();
+                                        pObj.SqlType = param["SqlType"].ToString().ToUpper();
+                                        pObj.Length = int.Parse(param["Length"].ToString());
+                                        pObj.OutputFlag = bool.Parse(param["OutputFlag"].ToString());
+                                        pObj.DefaultValue = param["DefaultValue"].ToString();
+                                        parameterObjs.Add(pObj);
+                                    }
+
+                                    if (dbObj.ProcedureList.ContainsKey(procedureKeyString) ||
+                                        _DbProcedures.Where(o => o.Value.ProcedureList.ContainsKey(procedureKeyString)).Count() > 0)
+                                    {
+                                        throw new Exception(string.Format("Duplicate Procedure: {0}", procedureKeyString));
+                                    }
+
+                                    try
+                                    {
+                                        dbObj.ProcedureList.Add(procedureKeyString, new ProcedureObj()
+                                        {
+                                            ProcedureName = dr["Name"].ToString(),
+                                            DBName = dr["DBName"].ToString(),
+                                            DBServer = dr["ServerIP"].ToString(),
+                                            ParameterObjs = parameterObjs
+                                        });
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        throw new Exception(string.Format("{0}: {1}", e.Message, procedureKeyString));
+                                    }
+                                }
+                            }
+                            dbObj.UpdateTime = DateTime.Now;
+                            dbObj.loadComplete = true;
+                        }
+                    }
+                }
+            }
+            return dbObj;
         }
 
         //private static void RenewDbProcedure(string connectionString)

@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DAOLibrary
@@ -60,17 +61,41 @@ namespace DAOLibrary
 
         private static DbObj TryGetDbObj(string decodeConnectionString, string procedureKey)
         {
-            if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
-                StoredProcedurePool.UpdateProcedure(decodeConnectionString);
-
-            if (StoredProcedurePool.DbProcedures == null || StoredProcedurePool.DbProcedures.Count == 0)
-                throw new Exception(Const.CANNOT_GET_SP_LIST);
-
+            var dbProcedure = StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString);
             var dbObj = new DbObj();
-            StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
+            if (!dbProcedure)
+            {
+                StoredProcedurePool.UpdateProcedure(decodeConnectionString);
+            }
+            else
+            {
+                // 2017-10-02 Added by Lyon Wang: 等待完成指定 MainDB 或 ThirdPartyDB 載入完成 ==> total 200 milliseconds
+                int retryTimes = 20;
+                do
+                {
+                    Thread.Sleep(10);
+                    StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
+                    retryTimes--;
+                }
+                while (!dbObj.loadComplete && retryTimes > 0);
+            }
+
+            if (!dbObj.loadComplete)
+            {
+                dbObj = StoredProcedurePool.GetOneDbObjFromDB(decodeConnectionString, procedureKey);
+            }
+
+            // 2017-10-02 Comment out by Lyon Wang: StoredProcedurePool 初始化就會 new 一個，所以不需要這段程式碼
+            //if (StoredProcedurePool.DbProcedures == null || StoredProcedurePool.DbProcedures.Count == 0)
+            //    throw new Exception(Const.CANNOT_GET_SP_LIST);
+
+            //var dbObj = new DbObj();
+            //StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
             if (dbObj.ProcedureList == null || dbObj.ProcedureList.Count == 0 || !dbObj.ProcedureList.ContainsKey(procedureKey))
+            {
                 //throw new Exception(string.Format(Const.NO_SUCH_SP, procedureKey));
-                return null;
+                dbObj = null;
+            }
 
             return dbObj;
         }
