@@ -19,4 +19,4 @@ develop_build_job:
   - c:\Multi-Runner\nuget.exe restore
   - '"c:\Program Files (x86)\MSBuild\14.0\Bin\amd64\MSBuild.exe" /p:Configuration=Release /p:Platform="Any CPU" /p:VersionAssembly=%BUILD_VERSION% DAOLibrary.sln'
   - c:\Multi-Runner\nuget.exe pack DAOLibrary\DAOLibrary.csproj -Properties Configuration=Release -Version %BUILD_VERSION%%BUILD_TARGET%
-  - c:\Multi-Runner\nuget.exe push DAOLibrary..%BUILD_VERSION%%BUILD_TARGET%.nupkg -ApiKey %NUGET_APIKEY% -Source %NUGET_SERVER%
+  - c:\Multi-Runner\nuget.exe push DAOLibrary.%BUILD_VERSION%%BUILD_TARGET%.nupkg -ApiKey %NUGET_APIKEY% -Source %NUGET_SERVER%
