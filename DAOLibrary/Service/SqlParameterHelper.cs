@@ -9,7 +9,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace DAOLibrary
 {
     public class SqlParameterHelper
@@ -35,69 +34,54 @@ namespace DAOLibrary
                 });
             }
         }
-
         private static DataTable OutPutColumns(string decodeConnectionString, string SpName, string ColumnName)
         {
             string strComment = string.Format(Const.TMP_GET_USER_DEFINED_TABLE_COL_COUNT, SpName, ColumnName);
             using (SqlDataAdapter saCount = new SqlDataAdapter(strComment, decodeConnectionString))
             {
-
                 DataTable dtCount = new DataTable();
                 saCount.Fill(dtCount);
-
                 int _procedureKey = int.Parse(dtCount.Rows[0]["Counts"].ToString());
-
                 DataTable dt = new DataTable();
-
                 for (int i = 0; i < _procedureKey; i++)
                 {
                     dt.Columns.Add();
                 }
-
                 return dt;
             }
         }
-
-        private static DbObj TryGetDbObj(string decodeConnectionString, string procedureKey)
+        private static DbObj TryGetDbObj(List<string> connectionStringList, string decodeConnectionString, string procedureKey)
         {
-            if (!StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
-                StoredProcedurePool.UpdateProcedure(decodeConnectionString);
-
+            if (StoredProcedurePool.DbProcedures == null || !StoredProcedurePool.DbProcedures.ContainsKey(decodeConnectionString))
+                StoredProcedurePool.UpdateProcedure(connectionStringList);
             if (StoredProcedurePool.DbProcedures == null || StoredProcedurePool.DbProcedures.Count == 0)
                 throw new Exception(Const.CANNOT_GET_SP_LIST);
-
             var dbObj = new DbObj();
             StoredProcedurePool.DbProcedures.TryGetValue(decodeConnectionString, out dbObj);
             if (dbObj.ProcedureList == null || dbObj.ProcedureList.Count == 0 || !dbObj.ProcedureList.ContainsKey(procedureKey))
                 //throw new Exception(string.Format(Const.NO_SUCH_SP, procedureKey));
                 return null;
-
             return dbObj;
         }
-
         private static SqlDbType TryGetSqlDbType(ParameterObj value)
         {
             var sqlDbType = new SqlDbType();
             var sqlDbTypeKey = string.Empty;
-
             if (value.SqlType.ToUpper() == "NUMERIC")
                 sqlDbTypeKey = "DECIMAL";
             else if (value.Parameter.StartsWith("@tb"))
                 sqlDbTypeKey = "STRUCTURED";
             else
                 sqlDbTypeKey = value.SqlType.ToUpper();
-
             DbDictionary.MappingSqlDbType.TryGetValue(sqlDbTypeKey, out sqlDbType);
             return sqlDbType;
         }
         #endregion
-
         #region DictionaryParameter
         private static object ConvertParamValue(Dictionary<string, object> sqlParameterValue, ParameterObj value, string decodeConnectionString, string procedureKey)
         {
             object parameterString = null;
             sqlParameterValue.TryGetValue(value.Parameter.Replace("@", ""), out parameterString);
-
             #region Process Json to DataTable
             if (parameterString == null || parameterString.ToString().Replace(" ", "") == "[]" ||
                 ((parameterString.GetType() == typeof(DataTable) && ((DataTable)parameterString).Rows.Count == 0)))
@@ -115,19 +99,16 @@ namespace DAOLibrary
             #endregion
             return parameterString;
         }
-
         private static string TryGetProcedureName(DbObj dbObj, string procedureKey)
         {
             try { return dbObj.ProcedureList[procedureKey].ProcedureName; }
             catch { throw new Exception("Cannot get procedure name for " + procedureKey); }
         }
-
         private static List<SqlParameter> TryGetSqlParamterList(DbObj dbObj, string decodeConnectionString, string procedureKey, Dictionary<string, object> sqlParameterValue)
         {
             var sqlparameterlist = new List<SqlParameter>();
             var paramsFromDb = dbObj.ProcedureList[procedureKey].ParameterObjs;
             int parameterValueLength = paramsFromDb.Where(x => x.OutputFlag == false).Count();
-
             //if (parameterValueLength > 0)
             {
                 var paramNameFromDB = paramsFromDb.Where(o => o.OutputFlag == true)
@@ -152,14 +133,13 @@ namespace DAOLibrary
             }
             return sqlparameterlist;
         }
-
         public static List<SqlParameter> GetSqlParameter(List<string> connectionStringList, string procedureKey, ref string commandTextString, Dictionary<string, object> sqlParameterValue)
         {
             try
             {
                 for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    var dbObj = TryGetDbObj(connectionStringList[i], procedureKey);
+                    var dbObj = TryGetDbObj(connectionStringList, connectionStringList[i], procedureKey);
                     if (dbObj == null)
                     {
                         if (i == connectionStringList.Count - 1)
@@ -172,9 +152,7 @@ namespace DAOLibrary
                         }
                     }
                     commandTextString = TryGetProcedureName(dbObj, procedureKey);
-
                     var sqlparameterlist = TryGetSqlParamterList(dbObj, connectionStringList[i], procedureKey, sqlParameterValue);
-
                     return sqlparameterlist;
                 }
                 return null;
@@ -184,14 +162,13 @@ namespace DAOLibrary
                 throw;
             }
         }
-
         public static List<SqlParameter> GetSqlParameterWithOutput(List<string> connectionStringList, string procedureKey, ref string commandTextString, Dictionary<string, object> sqlParameterValue, ref int outputCount)
         {
             try
             {
                 for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    var dbObj = TryGetDbObj(connectionStringList[i], procedureKey);
+                    var dbObj = TryGetDbObj(connectionStringList, connectionStringList[i], procedureKey);
                     if (dbObj == null)
                     {
                         if (i == connectionStringList.Count - 1)
@@ -222,25 +199,20 @@ namespace DAOLibrary
             }
         }
         #endregion
-
         #region objectParameter
         private static List<SqlParameter> TryGetSqlParameterListByObject(DbObj dbObj, string commandTextString, string decodeConnectionString, string procedureKey, object[] sqlParameterValue)
         {
-
             if (sqlParameterValue == null)
                 sqlParameterValue = new object[] { };
-
             var sqlParamList = new List<SqlParameter>();
             int paramValueLen = dbObj.ProcedureList[procedureKey].ParameterObjs.Count;
             if (paramValueLen > 0)
             {
                 object[] parameterValue = new object[paramValueLen];
                 sqlParameterValue.CopyTo(parameterValue, 0);
-
                 if (paramValueLen == parameterValue.Length)
                 {
                     int paramIdx = 0;
-
                     foreach (var value in dbObj.ProcedureList[procedureKey].ParameterObjs)
                     {
                         SqlDbType sqlDbType = TryGetSqlDbType(value);
@@ -256,14 +228,13 @@ namespace DAOLibrary
             }
             return sqlParamList;
         }
-
         public static List<SqlParameter> GetSqlParameterWithOutput(List<string> connectionStringList, string procedureKey, ref string commandTextString, object[] sqlParameterValue, ref int outputCount)
         {
             try
             {
                 for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    var dbObj = TryGetDbObj(connectionStringList[i], procedureKey);
+                    var dbObj = TryGetDbObj(connectionStringList, connectionStringList[i], procedureKey);
                     if (dbObj == null)
                     {
                         if (i == connectionStringList.Count - 1)
@@ -276,9 +247,7 @@ namespace DAOLibrary
                         }
                     }
                     commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
-
                     var sqlParamList = TryGetSqlParameterListByObject(dbObj, commandTextString, connectionStringList[i], procedureKey, sqlParameterValue);
-
                     foreach (var p in sqlParamList)
                     {
                         if (p.Direction == ParameterDirection.Output)
@@ -295,14 +264,13 @@ namespace DAOLibrary
                 throw;
             }
         }
-
         public static List<SqlParameter> GetSqlParameter(List<string> connectionStringList, string procedureKey, ref string commandTextString, object[] sqlParameterValue)
         {
             try
             {
                 for (int i = 0; i < connectionStringList.Count; i++)
                 {
-                    var dbObj = TryGetDbObj(connectionStringList[i], procedureKey);
+                    var dbObj = TryGetDbObj(connectionStringList, connectionStringList[i], procedureKey);
                     if (dbObj == null)
                     {
                         if (i == connectionStringList.Count - 1)
@@ -315,9 +283,7 @@ namespace DAOLibrary
                         }
                     }
                     commandTextString = Convert.ToString(dbObj.ProcedureList[procedureKey].ProcedureName);
-
                     var sqlparameterlist = TryGetSqlParameterListByObject(dbObj, commandTextString, connectionStringList[i], procedureKey, sqlParameterValue);
-
                     return sqlparameterlist;
                 }
                 return null;
@@ -328,13 +294,10 @@ namespace DAOLibrary
             }
         }
         #endregion
-
         public static void OutputSqlParameter(List<SqlParameter> sqlParameterList, int outputCount, ref object[] outputParamValue)
         {
             outputParamValue = new object[outputCount];
-
             int procedureOutputValue = 0;
-
             foreach (SqlParameter sqlParameter in sqlParameterList)
             {
                 if (sqlParameter.Direction == ParameterDirection.Output)
