@@ -1,10 +1,13 @@
-﻿using DAOLibrary.Service;
+﻿using Amazon.XRay.Recorder.Core;
+using DAOLibrary.Service;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace DAOLibrary
@@ -14,6 +17,8 @@ namespace DAOLibrary
     /// </summary>
     public class SqlDataAccess : IDataAccess
     {
+        private static readonly Regex _portNumberRegex = new Regex(@",\d+$");
+
         public SqlDataAccess(string connectionString, bool isTest = false, int procUpdateSec = 86400)
             : base(connectionString, isTest, procUpdateSec) { }
 
@@ -108,6 +113,7 @@ namespace DAOLibrary
 
         private DataSet GetDataSet(List<SqlParameter> sqlParameterList, string procedureKey, string cmdStr, int timeout = 30)
         {
+            var isRecordInXRay = (new System.Diagnostics.StackTrace().GetFrames().Last().GetMethod().Name != "InitializeApplication");
             try
             {
                 using (SqlConnection conn = new SqlConnection(GetSqlConnectionStr(procedureKey)))
@@ -117,11 +123,32 @@ namespace DAOLibrary
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.CommandTimeout = timeout > 0 ? timeout : 30;
                         cmd.Parameters.AddRange(sqlParameterList.ToArray());
+
+                        #region Input
+                        if (isRecordInXRay)
+                        {
+                            AWSXRayRecorder recorder = AWSXRayRecorder.Instance;
+                            recorder.BeginSubsegment(conn.Database + "@" + _portNumberRegex.Replace(conn.DataSource, String.Empty));
+                            recorder.SetNamespace("remote");
+                            recorder.AddAnnotation("SPName", cmd.CommandText);
+                            recorder.AddAnnotation("Input", String.Join(Environment.NewLine, sqlParameterList.Select(sqlParameter => String.Format("{0} = {1}", sqlParameter.ParameterName, sqlParameter.SqlValue.ToString()))));
+                        }
+                        #endregion
+
                         using (SqlDataAdapter sa = new SqlDataAdapter(cmd))
                         {
                             using (DataSet ds = new DataSet())
                             {
                                 sa.Fill(ds);
+
+                                #region Output
+                                if (new System.Diagnostics.StackTrace().GetFrames().Last().GetMethod().Name != "InitializeApplication")
+                                {
+                                    AWSXRayRecorder recorder = AWSXRayRecorder.Instance;
+                                    recorder.AddAnnotation("Output", JsonConvert.SerializeObject(ds));
+                                }
+                                #endregion
+
                                 return ds;
                             }
                         }
@@ -137,6 +164,14 @@ namespace DAOLibrary
             catch (Exception e)
             {
                 throw e;
+            }
+            finally
+            {
+                if (isRecordInXRay)
+                {
+                    AWSXRayRecorder recorder = AWSXRayRecorder.Instance;
+                    recorder.EndSubsegment();
+                }
             }
         }
 
@@ -225,7 +260,8 @@ namespace DAOLibrary
                 throw;
             }
         }
-        public static long ConcurrentDatabaseConnectionCount {
+        public static long ConcurrentDatabaseConnectionCount
+        {
             get { return _concurrent_database_connection_count; }
         }
         private static long _concurrent_database_connection_count = 0;
